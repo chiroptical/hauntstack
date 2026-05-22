@@ -1,9 +1,7 @@
-%%%-------------------------------------------------------------------
-%% @doc hauntstack top level supervisor.
-%% @end
-%%%-------------------------------------------------------------------
-
 -module(hauntstack_sup).
+-moduledoc """
+hauntstack top level supervisor
+""".
 
 -behaviour(supervisor).
 
@@ -11,10 +9,8 @@
 
 -export([init/1]).
 
--define(SERVER, ?MODULE).
-
 start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% sup_flags() = #{strategy => strategy(),         % optional
 %%                 intensity => non_neg_integer(), % optional
@@ -31,7 +27,13 @@ init([]) ->
         intensity => 0,
         period => 1
     },
-    ChildSpecs = [],
+    ChildSpecs = [
+        %% supervisor_wire:add_wire() allows you to generate a wire
+        #{
+            id => server_wire_supervisor,
+            start => {supervisor_wire, start_link, []}
+        }
+    ],
     {ok, {SupFlags, ChildSpecs}}.
 
 %% internal functions

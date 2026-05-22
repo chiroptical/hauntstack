@@ -20,9 +20,12 @@ these layers are supposed to be robust even in these conditions.
     - Both a wire and a NIC are simple_one_for_one
         - Neither need names, identified only by Pid is fine
         - Pids are basically used to build topology and send frames
-    - MAC registry service, start with globally unique MAC addresses
     - Ethernet II frames sent via binary encoding, gen_server only ever expects
-      to recieve calls on binary data
+      to recieve casts on binary data
+
+# Later
+
+- MAC registry service, start with globally unique MAC addresses
 
 # Haunting ideas
 

@@ -72,7 +72,7 @@ command = "rebar3"
 # Command-line arguments for the command
 options = [ "fmt", "-w", "--" ]
 # Glob pattern of files to include
-includes = [ "**.erl", "rebar.config" ]
+includes = [ "**.erl", "rebar.config", "src/hauntstack.app.src" ]
 # Glob patterns of files to exclude
 excludes = []
 # Controls the order of application when multiple formatters match the same file
