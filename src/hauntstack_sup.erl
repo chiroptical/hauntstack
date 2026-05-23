@@ -28,10 +28,10 @@ init([]) ->
         period => 1
     },
     ChildSpecs = [
-        %% supervisor_wire:build() allows you to generate a wire
+        %% You need 'wire:create()' to connect network devices
         #{
-            id => server_wire_supervisor,
-            start => {supervisor_wire, start_link, []}
+            id => wire_supervisor,
+            start => {wire_sup, start_link, []}
         },
         %% supervisor_nic:build() allows you to generate a NIC
         #{

@@ -1,11 +1,19 @@
 { pkgs, ... }:
-pkgs.mkShell {
-  buildInputs = with pkgs; [
+let
+  beamPackages = with pkgs.beam28Packages; [
     erlang
     rebar3
-    erlang-language-platform
-    nixfmt
-    treefmt
-    pinact
+    ex_doc
   ];
+in
+pkgs.mkShell {
+  buildInputs =
+    beamPackages
+    ++ (with pkgs; [
+      erlang-language-platform
+      nixfmt
+      treefmt
+      pinact
+      serve
+    ]);
 }

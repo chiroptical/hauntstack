@@ -1,13 +1,9 @@
--module(supervisor_nic).
+-module(network_interface_card_sup).
 -moduledoc """
     
 """.
 
 -behavior(supervisor).
-
--export([
-    build/0
-]).
 
 -export([
     start_link/0,
@@ -20,13 +16,9 @@ start_link() ->
 init([]) ->
     {ok,
         {{simple_one_for_one, 3, 30}, [
-            {server_nic,
+            {network_interface_card,
                 {
-                    server_nic, start_link, []
+                    network_interface_card, start_link, []
                 },
                 temporary, 2000, worker, []}
         ]}}.
-
-build() ->
-    Id = crypto:strong_rand_bytes(6),
-    supervisor:start_child(?MODULE, [Id]).

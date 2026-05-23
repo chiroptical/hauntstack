@@ -11,21 +11,15 @@ these layers are supposed to be robust even in these conditions.
 # Parts
 
 1. Two Network Interface Cards (NIC) connected via a perfect wire
-    - A wire has a `left` and `right` side
-    - A wire is a process with a Pid
-    - A NIC connects to one side of a wire, i.e `nic:connect(WirePid)`
-        - NIC stores WirePid
-        - Wire stores MAC
-    - A NIC is identified by a MAC Address i.e. 6 bytes
-    - Both a wire and a NIC are simple_one_for_one
-        - Neither need names, identified only by Pid is fine
-        - Pids are basically used to build topology and send frames
-    - Ethernet II frames sent via binary encoding, gen_server only ever expects
-      to recieve casts on binary data
 
 # Later
 
 - MAC registry service, start with globally unique MAC addresses
+- Set up OTEL tracing for packets and metrics for components
+- Tap is an endpoint which simply records what it recieved
+- Switches are `#{PortNumber :: integer() => Port :: pid()}`, Port is similar to
+  NIC but without a MAC address.
+- Topology DSL, define endpoints with names/options and wires which connect endpoints
 
 # Haunting ideas
 
