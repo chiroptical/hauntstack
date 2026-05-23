@@ -3,7 +3,9 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -export([
-    plug_in_and_unplug_two_nics/1
+    plug_in_and_unplug_two_nics/1,
+    unplug_error_not_plugged/1,
+    plug_in_plug_in_error_already_connected/1
 ]).
 
 -export([
@@ -16,11 +18,22 @@
 
 all() ->
     [
-        plug_in_and_unplug_two_nics
+        plug_in_and_unplug_two_nics,
+        unplug_error_not_plugged,
+        plug_in_plug_in_error_already_connected
     ].
 
-%% TODO: unplug fails when not plugged in
-%% TODO: double plug fails with already connected
+plug_in_plug_in_error_already_connected(_Config) ->
+    {ok, WirePid} = supervisor_wire:build(),
+    {ok, NicPid} = supervisor_nic:build(),
+    ok = server_nic:plug_in(NicPid, WirePid),
+    Result = server_nic:plug_in(NicPid, WirePid),
+    ?assertEqual(Result, {error, nic_already_connected}).
+
+unplug_error_not_plugged(_Config) ->
+    {ok, NicPid} = supervisor_nic:build(),
+    Result = server_nic:unplug(NicPid),
+    ?assertEqual(Result, {error, nic_unplugged}).
 
 plug_in_and_unplug_two_nics(_Config) ->
     {ok, WirePid} = supervisor_wire:build(),
