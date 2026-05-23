@@ -1,34 +1,27 @@
 -module(server_wire).
 -moduledoc """
-A wire represents a connection between two network interface cards.
+A wire represents a connection between two network interface cards (NIC).
 
 The connection has a `left` and `right` side, each can be `unplugged` or
 `{plugged, Into}`. The sides of the wire are only needed to figure out where
 to forward messages to.
 
-All networking messages should use `server_wire:send/1` to relay information.
+All networking messages should use `server_wire:send/2` to relay information.
 These are asynchronous messages and only do anything if both sides are plugged
 in and the caller `pid()` matches one of the sides.
 
 A wire's connection status is managed by a NIC. There is no public interface to
-a wire to plug or unplug it. See `server_nic:plug_in/2` for more details.
-
-TODO: move to server_nic()
-```erlang
-{ok, WirePid} = supervisor_wire:build(),
-{ok, NicOnePid} = supervisor_nic:build(),
-{ok, NicTwoPid} = supervisor_nic:build(),
-ok = server_nic:plug_in(NicOnePid, WirePid),
-ok = server_nic:plug_in(NicTwoPid, WirePid),
-...
-```
+a wire to plug or unplug it. See `server_nic:plug_in/2` for more details. You
+are free to call `unsafe_plug_in/2` or `unsafe_unplug/2` but unintended haunting
+will occur.
 """.
 
 -behavior(gen_server).
 
 -export([
     start_link/1,
-    plug_in/2
+    unsafe_plug_in/2,
+    unsafe_unplug/2
 ]).
 
 -export([
@@ -44,12 +37,21 @@ ok = server_nic:plug_in(NicTwoPid, WirePid),
 start_link(Id) ->
     gen_server:start_link(?MODULE, [Id], []).
 
-%% TODO: MOVE TO `server_nic`
--spec plug_in(Child :: pid(), To :: pid()) -> Reply :: term().
-plug_in(Child, To) ->
-    gen_server:call(Child, {plug_in, To}).
+-spec unsafe_plug_in(Wire :: pid(), Nic :: pid()) -> Reply :: term().
+-doc """
+    
+""".
+unsafe_plug_in(Wire, Nic) ->
+    gen_server:call(Wire, {plug_in, Nic}).
 
--type status() :: unplugged | {plugged, Into :: binary()}.
+-spec unsafe_unplug(Wire :: pid(), Nic :: pid()) -> Reply :: term().
+-doc """
+    
+""".
+unsafe_unplug(Wire, Nic) ->
+    gen_server:call(Wire, {unplug, Nic}).
+
+-type status() :: unplugged | {plugged, Nic :: binary()}.
 
 -record(state, {id :: binary(), left :: status(), right :: status()}).
 
@@ -62,14 +64,22 @@ handle_cast(_Msg, State) ->
 handle_info(_Msg, State) ->
     {noreply, State}.
 
-handle_call({plug_in, To}, _From, State = #state{left = Left, right = Right}) ->
+handle_call({plug_in, Nic}, _From, State = #state{left = Left, right = Right}) ->
     case {Left, Right} of
-        {unplugged, Right} ->
-            {reply, ok, State#state{left = To}};
-        {Left, unplugged} ->
-            {reply, ok, State#state{right = To}};
-        {Left, Right} ->
-            {reply, {error, wire_has_no_open_ends}, State}
+        {unplugged, _} ->
+            {reply, ok, State#state{left = {plugged, Nic}}};
+        {{plugged, L}, unplugged} when L =:= Nic ->
+            {reply, {error, refuse_wire_to_self}, State};
+        {_, unplugged} ->
+            {reply, ok, State#state{right = {plugged, Nic}}};
+        _ ->
+            {reply, {error, wire_fully_plugged_in}, State}
+    end;
+handle_call({unplug, Nic}, _From, State = #state{left = Left, right = Right}) ->
+    case {Left, Right} of
+        {{plugged, Nic}, _} -> {reply, ok, State#state{left = unplugged}};
+        {_, {plugged, Nic}} -> {reply, ok, State#state{right = unplugged}};
+        _ -> {reply, {error, wire_not_connected}, State}
     end.
 
 code_change(_OldVersion, State, _Extra) ->

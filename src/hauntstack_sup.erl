@@ -28,10 +28,15 @@ init([]) ->
         period => 1
     },
     ChildSpecs = [
-        %% supervisor_wire:add_wire() allows you to generate a wire
+        %% supervisor_wire:build() allows you to generate a wire
         #{
             id => server_wire_supervisor,
             start => {supervisor_wire, start_link, []}
+        },
+        %% supervisor_nic:build() allows you to generate a NIC
+        #{
+            id => server_nic_supervisor,
+            start => {supervisor_nic, start_link, []}
         }
     ],
     {ok, {SupFlags, ChildSpecs}}.
