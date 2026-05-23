@@ -26,6 +26,7 @@ these layers are supposed to be robust even in these conditions.
 # Later
 
 - MAC registry service, start with globally unique MAC addresses
+- Set up OTEL tracing for packets and metrics for components
 
 # Haunting ideas
 
