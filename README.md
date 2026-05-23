@@ -39,4 +39,11 @@ these layers are supposed to be robust even in these conditions.
     - MAC address change
     - MAC address overlap
 
+# Potential inspiration
+
+- Simulate bad network connections with [comcast][comcast]
+- Chaos engineering for Kubernetes with [Chaos Mesh][chaos-mesh] 
+
+[comcast]: https://github.com/tylertreat/comcast
+[chaos-mesh]: https://github.com/chaos-mesh/chaos-mesh
 [osi]: https://en.wikipedia.org/wiki/OSI_model
