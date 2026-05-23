@@ -28,6 +28,8 @@ ok = server_nic:unplug(NicOnePid),
 
 -export([
     start_link/1,
+    send/2,
+    last_message/1,
     plug_in/2,
     unplug/1
 ]).
@@ -45,6 +47,20 @@ ok = server_nic:unplug(NicOnePid),
 start_link(Id) ->
     gen_server:start_link(?MODULE, [Id], []).
 
+-spec send(Nic :: pid(), Msg :: binary()) -> ok.
+-doc """
+    
+""".
+send(Nic, Msg) ->
+    gen_server:cast(Nic, Msg).
+
+-spec last_message(Nic :: pid()) -> Reply :: term().
+-doc """
+    
+""".
+last_message(Nic) ->
+    gen_server:call(Nic, last_message).
+
 -spec plug_in(Nic :: pid(), Wire :: pid()) -> Reply :: term().
 plug_in(Nic, Wire) ->
     gen_server:call(Nic, {plug_in, Wire}).
@@ -53,19 +69,29 @@ plug_in(Nic, Wire) ->
 unplug(Nic) ->
     gen_server:call(Nic, unplug).
 
--type status() :: unplugged | {plugged, Wire :: binary()}.
+-type status() :: unplugged | {plugged, Wire :: pid()}.
 
--record(state, {id :: binary(), status :: status()}).
+-type last_message() :: none | {some, Msg :: binary()}.
+
+-record(state, {id :: binary(), status :: status(), last_message :: last_message()}).
 
 init([Id]) ->
-    {ok, #state{id = Id, status = unplugged}}.
+    {ok, #state{id = Id, status = unplugged, last_message = none}}.
 
-handle_cast(_Msg, State) ->
-    {noreply, State}.
+handle_cast(Msg, State = #state{status = Status}) ->
+    case Status of
+        unplugged ->
+            {noreply, State};
+        {plugged, Wire} ->
+            server_wire:send(Wire, Msg),
+            {noreply, State#state{last_message = Msg}}
+    end.
 
 handle_info(_Msg, State) ->
     {noreply, State}.
 
+handle_call(last_message, _From, State = #state{last_message = LastMessage}) ->
+    {reply, {ok, LastMessage}, State};
 handle_call({plug_in, Wire}, _From, State = #state{status = Status}) ->
     case Status of
         unplugged ->

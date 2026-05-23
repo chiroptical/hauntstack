@@ -20,6 +20,8 @@ will occur.
 
 -export([
     start_link/1,
+    send/2,
+    last_message/1,
     unsafe_plug_in/2,
     unsafe_unplug/2
 ]).
@@ -37,9 +39,27 @@ will occur.
 start_link(Id) ->
     gen_server:start_link(?MODULE, [Id], []).
 
+-spec send(Wire :: pid(), Msg :: binary()) -> ok.
+-doc """
+If you know the Wire's PID, send it a message.
+I need to know who it is from to understand how to forward it.
+Can only use `send/2` from within the caller e.g. a NIC process.
+""".
+send(Wire, Msg) ->
+    gen_server:cast(Wire, {self(), Msg}).
+
+-spec last_message(Wire :: pid()) -> Reply :: term().
+-doc """
+Useful for testing what just happened to a wire, e.g. a NIC sending a message to
+another NIC should set `last_message` on the connecting wire.
+""".
+last_message(Wire) ->
+    gen_server:call(Wire, last_message).
+
 -spec unsafe_plug_in(Wire :: pid(), Nic :: pid()) -> Reply :: term().
 -doc """
-    
+Should we use `self()` here instead of `Nic`? That way you are basically
+required to call it inside a component?
 """.
 unsafe_plug_in(Wire, Nic) ->
     gen_server:call(Wire, {plug_in, Nic}).
@@ -53,17 +73,42 @@ unsafe_unplug(Wire, Nic) ->
 
 -type status() :: unplugged | {plugged, Nic :: binary()}.
 
--record(state, {id :: binary(), left :: status(), right :: status()}).
+-doc """
+""".
+-type last_message() :: none | {some, Msg :: binary()}.
+
+-record(state, {
+    id :: binary(), left :: status(), right :: status(), last_message :: last_message()
+}).
 
 init([Id]) ->
-    {ok, #state{id = Id, left = unplugged, right = unplugged}}.
+    {ok, #state{id = Id, left = unplugged, right = unplugged, last_message = none}}.
 
-handle_cast(_Msg, State) ->
-    {noreply, State}.
+handle_cast({Pid, Msg}, State = #state{left = Left, right = Right}) ->
+    case {Left, Right} of
+        % If either side of the wire is unplugged, we can't forward the message
+        {unplugged, _} ->
+            {noreply, State};
+        {_, unplugged} ->
+            {noreply, State};
+        %% If both sides are plugged in and either the left or right are plugged
+        %% into the caller PID, forward the message
+        {{plugged, Pid}, {plugged, R}} ->
+            server_nic:send(R, Msg),
+            {noreply, State#state{last_message = Msg}};
+        {{plugged, L}, {plugged, Pid}} ->
+            server_nic:send(L, Msg),
+            {noreply, State#state{last_message = Msg}};
+        % If either side of the wire is unplugged, we can't forward the message
+        {{plugged, _}, {plugged, _}} ->
+            {noreply, State}
+    end.
 
 handle_info(_Msg, State) ->
     {noreply, State}.
 
+handle_call(last_message, _From, State = #state{last_message = LastMessage}) ->
+    {reply, {ok, LastMessage}, State};
 handle_call({plug_in, Nic}, _From, State = #state{left = Left, right = Right}) ->
     case {Left, Right} of
         {unplugged, _} ->
