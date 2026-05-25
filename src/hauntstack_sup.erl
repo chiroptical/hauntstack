@@ -28,6 +28,11 @@ init([]) ->
         period => 1
     },
     ChildSpecs = [
+        %% channel:build() allows you to generate a wire
+        #{
+            id => channel_supervisor,
+            start => {channel_sup, start_link, []}
+        },
         %% supervisor_wire:build() allows you to generate a wire
         #{
             id => server_wire_supervisor,
