@@ -1,4 +1,4 @@
--module(server_wire_SUITE).
+-module(wire_SUITE).
 
 -include_lib("eunit/include/eunit.hrl").
 

@@ -1,13 +1,9 @@
--module(channel_sup).
+-module(wire_sup).
 -moduledoc """
     
 """.
 
 -behavior(supervisor).
-
--export([
-    build/0
-]).
 
 -export([
     start_link/0,
@@ -20,13 +16,9 @@ start_link() ->
 init([]) ->
     {ok,
         {{simple_one_for_one, 3, 30}, [
-            {server_channel,
+            {server_wire,
                 {
-                    server_channel, start_link, []
+                    server_wire, start_link, []
                 },
                 temporary, 2000, worker, []}
         ]}}.
-
-build() ->
-    Id = crypto:strong_rand_bytes(6),
-    supervisor:start_child(?MODULE, [Id]).

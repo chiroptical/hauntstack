@@ -17,21 +17,43 @@ management it would like e.g. saving the most recent frame.
 """.
 
 -doc """
-The network endpoint will call `wire:connect(?MODULE, Endpoint :: pid(), Wire :: pid())`
-if it succeeds we'll get back a channel to store in the network endpoint internal state
-and subsequently call `wire:send(Channel :: pid(), Msg :: binary())` 
+The network endpoint can call,
+
+```erlang
+wire:connect({Module :: atom(), Endpoint :: pid()}, Wire :: pid())
+```
+
+if it succeeds we'll get back a channel to store in the network endpoint
+internal state and subsequently call
+```erlang
+wire:send(Channel :: pid(), Msg :: binary())
+```
 """.
 -callback connected({Mod :: atom(), Endpoint :: pid()}, Channel :: pid()) -> ok.
 
 -doc """
-The network endpoint can call `wire:disconnect(?MODULE, Endpoint :: pid(), Wire :: pid(), Channel :: pid())`
-if it succeeds we'll just get back the pair to cleanup the network endpoint internal state.
+The network endpoint can call,
+
+```erlang
+wire:disconnect({Module :: atom(), Endpoint :: pid()}, Wire :: pid(), Channel :: pid())
+```
+
+if it succeeds we'll just get back the pair to cleanup the network endpoint
+internal state.
 """.
 -callback disconnected({Mod :: atom(), Endpoint :: pid()}) -> ok.
 
 -doc """
-The network endpoint can call `wire:send(Module :: atom(), Endpoint :: pid(), Channel ::
-pid(), Msg :: binary())` if it succeeds, we'll back back the successful message
+The network endpoint can call
+
+```erlang
+channel:send(
+    {Module :: atom(), Endpoint :: pid()},
+    Channel :: pid(),
+    Msg :: binary()
+)
+```
+if it succeeds, we'll back back the successful message
 e.g. if we want to store it in the network endpoint internal state.
 """.
 -callback sent({Mod :: atom(), Endpoint :: pid()}, Msg :: binary()) -> ok.
