@@ -3,57 +3,26 @@
 A network endpoint is connected to one end of a wire via a channel.
 The channel controls the flow of data and it owned by the wire.
 
-These callbacks require `{Module, Endpoint}` to function because they have to
-call into the `gen_server` behavior to store any information.
+# Future considerations
 
-The wire connection will fire a synchronous callback which returns a Channel
-`pid()` for the network device to send subsequent binary messages.
-
-The wire disconnect will fire a callback which allows the endpoint to clean up
-its' internal state related to the connection.
-
-The wire send will fire a callback which allows the endpoint to do any state
-management it would like e.g. saving the most recent frame.
+May want to narrow the return type for the synchronous calls. It will simplify
+handling `wire.erl` when these callbacks fail, e.g. if it is already connected
+to another wire.
 """.
 
 -doc """
-The network endpoint can call,
-
-```erlang
-wire:connect({Module :: atom(), Endpoint :: pid()}, Wire :: pid())
-```
-
-if it succeeds we'll get back a channel to store in the network endpoint
-internal state and subsequently call
-```erlang
-wire:send(Channel :: pid(), Msg :: binary())
-```
+A synchronous callback for a network endpoint to store the Wire's process id.
+The endpoint can call `wire:send/3` to transmit data over the connected wire.
 """.
--callback connected({Mod :: atom(), Endpoint :: pid()}, Channel :: pid()) -> ok.
+-callback connect(Endpoint :: pid(), Wire :: pid()) -> Reply :: term().
 
 -doc """
-The network endpoint can call,
-
-```erlang
-wire:disconnect({Module :: atom(), Endpoint :: pid()}, Wire :: pid(), Channel :: pid())
-```
-
-if it succeeds we'll just get back the pair to cleanup the network endpoint
-internal state.
+A synchronous callback for a network endpoint to forget it is connected to
+a wire.
 """.
--callback disconnected({Mod :: atom(), Endpoint :: pid()}) -> ok.
+-callback disconnect(Endpoint :: pid()) -> Reply :: term().
 
 -doc """
-The network endpoint can call
-
-```erlang
-channel:send(
-    {Module :: atom(), Endpoint :: pid()},
-    Channel :: pid(),
-    Msg :: binary()
-)
-```
-if it succeeds, we'll back back the successful message
-e.g. if we want to store it in the network endpoint internal state.
+An asynchronous callback to handle a message transmitted over a wire.
 """.
--callback sent({Mod :: atom(), Endpoint :: pid()}, Msg :: binary()) -> ok.
+-callback recieve(Endpoint :: pid(), Msg :: binary()) -> ok.

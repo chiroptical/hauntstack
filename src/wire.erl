@@ -1,16 +1,23 @@
 -module(wire).
 -moduledoc """
-A wire represents a connection between two network interface cards (NIC).
+A wire represents a connection between two network endpoints, e.g. network
+interface cards NICs.
 
 The connection has a `left` and `right` side, each can be `down` or `up`. The
-sides of the wire are only needed to manage connecting and disconnecting network
-endpoints.
+sides have no semantic meaning they are used to determine the directionality of
+data tranmission. For example, a frame sent to the left side will be recieved on
+the right side.
 
-All networking messages should use `wire:send/3` to relay information.
-These are asynchronous messages and only do anything if both sides are plugged
-in and the caller `pid()` matches one of the sides.
+All networking messages should use `wire:send/3` to relay information. These are
+asynchronous messages and only do anything if both sides are plugged in and the
+netwrork endpoint `pid()` matches one of the sides.
 
-A wire can be connected to anything that implements the `network_endpoint` behavior.
+A wire can be connected to anything that implements the `network_endpoint`
+behavior.
+
+# Future considerations
+
+Add `connect/3` to connect both sides of a wire at once.
 """.
 
 -behavior(gen_server).
@@ -70,7 +77,6 @@ handle_info(_Msg, State) ->
 
 handle_cast({send, {Module, Endpoint}, Msg}, State = #state{left = Left, right = Right}) ->
     maybe
-        {ok, _Mac} ?= Module:mac_address(Endpoint),
         case {Left, Right} of
             {
                 {up, #link{network_endpoint = {Module, Endpoint}}},
@@ -117,7 +123,7 @@ handle_call({disconnect, {Module, Endpoint}}, _From, State = #state{left = Left,
     case {Left, Right} of
         {{up, #link{network_endpoint = {Module, Endpoint}}}, _} ->
             maybe
-                ok ?= Module:disconnect(Endpoint, self()),
+                ok ?= Module:disconnect(Endpoint,
                 {reply, ok, State#state{left = down}}
             else
                 _Err ->
@@ -125,7 +131,7 @@ handle_call({disconnect, {Module, Endpoint}}, _From, State = #state{left = Left,
             end;
         {_, {up, #link{network_endpoint = {Module, Endpoint}}}} ->
             maybe
-                ok ?= Module:disconnect(Endpoint, self()),
+                ok ?= Module:disconnect(Endpoint),
                 {reply, ok, State#state{right = down}}
             else
                 _Err ->
