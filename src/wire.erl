@@ -82,13 +82,13 @@ handle_cast({send, {Module, Endpoint}, Msg}, State = #state{left = Left, right =
                 {up, #link{network_endpoint = {Module, Endpoint}}},
                 {up, #link{network_endpoint = {OtherModule, OtherEndpoint}}}
             } ->
-                ok = OtherModule:recieve(OtherEndpoint, Msg),
+                ok = OtherModule:recieve(OtherEndpoint, self(), Msg),
                 {noreply, State};
             {
                 {up, #link{network_endpoint = {OtherModule, OtherEndpoint}}},
                 {up, #link{network_endpoint = {Module, Endpoint}}}
             } ->
-                ok = OtherModule:recieve(OtherEndpoint, Msg),
+                ok = OtherModule:recieve(OtherEndpoint, self(), Msg),
                 {noreply, State};
             {_, _} ->
                 {noreply, State}
@@ -123,7 +123,7 @@ handle_call({disconnect, {Module, Endpoint}}, _From, State = #state{left = Left,
     case {Left, Right} of
         {{up, #link{network_endpoint = {Module, Endpoint}}}, _} ->
             maybe
-                ok ?= Module:disconnect(Endpoint,
+                ok ?= Module:disconnect(Endpoint, self()),
                 {reply, ok, State#state{left = down}}
             else
                 _Err ->
@@ -131,7 +131,7 @@ handle_call({disconnect, {Module, Endpoint}}, _From, State = #state{left = Left,
             end;
         {_, {up, #link{network_endpoint = {Module, Endpoint}}}} ->
             maybe
-                ok ?= Module:disconnect(Endpoint),
+                ok ?= Module:disconnect(Endpoint, self()),
                 {reply, ok, State#state{right = down}}
             else
                 _Err ->

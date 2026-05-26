@@ -20,9 +20,9 @@ The endpoint can call `wire:send/3` to transmit data over the connected wire.
 A synchronous callback for a network endpoint to forget it is connected to
 a wire.
 """.
--callback disconnect(Endpoint :: pid()) -> Reply :: term().
+-callback disconnect(Endpoint :: pid(), Wire :: pid()) -> Reply :: term().
 
 -doc """
 An asynchronous callback to handle a message transmitted over a wire.
 """.
--callback recieve(Endpoint :: pid(), Msg :: binary()) -> ok.
+-callback recieve(Endpoint :: pid(), Wire :: pid(), Msg :: binary()) -> ok.
