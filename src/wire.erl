@@ -42,8 +42,8 @@ Add `connect/3` to connect both sides of a wire at once.
 ]).
 
 build() ->
-    Mac = crypto:strong_rand_bytes(6),
-    supervisor:start_child(wire_sup, [Mac]).
+    Id = crypto:strong_rand_bytes(6),
+    supervisor:start_child(wire_sup, [Id]).
 
 -spec start_link(Id :: binary()) -> gen_server:start_ret().
 start_link(Id) ->

@@ -10,16 +10,19 @@ these layers are supposed to be robust even in these conditions.
 
 # Parts
 
-1. Two Network Interface Cards (NIC) connected via a perfect wire
+- [x] Two network interface cards (NICs) connected via a perfect wire
+- [ ] Multi-port switch with learning and flooding
+- [ ] IPv4
+- [ ] ARP
+- [ ] UDP
+- [ ] TCP
 
 # Later
 
-- MAC registry service, start with globally unique MAC addresses
-- Set up OTEL tracing for packets and metrics for components
-- Tap is an endpoint which simply records what it recieved
-- Switches are `#{PortNumber :: integer() => Port :: pid()}`, Port is similar to
-  NIC but without a MAC address.
 - Topology DSL, define endpoints with names/options and wires which connect endpoints
+- MAC registry service, start with globally unique MAC addresses
+- Tap is an endpoint which simply records what it recieved
+- Set up OTEL tracing for packets and metrics for components
 
 # Haunting ideas
 
@@ -31,7 +34,7 @@ these layers are supposed to be robust even in these conditions.
     - Bandwidth (via event based clock)
 - NIC
     - MAC address change
-    - MAC address overlap
+    - MAC address overlap (via MAC registry)
 
 # Potential inspiration
 
