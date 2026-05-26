@@ -3,9 +3,9 @@
 -include_lib("eunit/include/eunit.hrl").
 
 -export([
-    unsafe_plug_in_unplug/1,
-    unsafe_unplug_without_plug_in/1,
-    unsafe_plug_in_plug_in/1
+    disconnect/1,
+    connect_disconnect/1,
+    connect_connect/1
 ]).
 
 -export([
@@ -18,32 +18,32 @@
 
 all() ->
     [
-        unsafe_plug_in_unplug,
-        unsafe_unplug_without_plug_in,
-        unsafe_plug_in_plug_in
+        disconnect,
+        connect_disconnect,
+        connect_connect
     ].
 
-unsafe_unplug_without_plug_in(_Config) ->
-    {ok, WirePid} = supervisor_wire:build(),
-    {ok, NicPid} = supervisor_nic:build(),
-    Unplug = server_wire:unsafe_unplug(WirePid, NicPid),
-    ?assertEqual(Unplug, {error, wire_not_connected}).
+disconnect(_Config) ->
+    {ok, WirePid} = wire:build(),
+    {ok, NicPid} = network_interface_card:build(),
+    Result = wire:disconnect({network_interface_card, NicPid}, WirePid),
+    ?assertEqual({error, wire_not_connected}, Result).
 
-unsafe_plug_in_unplug(_Config) ->
-    {ok, WirePid} = supervisor_wire:build(),
-    {ok, NicPid} = supervisor_nic:build(),
-    PlugIn = server_wire:unsafe_plug_in(WirePid, NicPid),
-    ?assertEqual(PlugIn, ok),
-    Unplug = server_wire:unsafe_unplug(WirePid, NicPid),
-    ?assertEqual(Unplug, ok).
+connect_disconnect(_Config) ->
+    {ok, WirePid} = wire:build(),
+    {ok, NicPid} = network_interface_card:build(),
+    Connect = wire:connect({network_interface_card, NicPid}, WirePid),
+    ?assertEqual(ok, Connect),
+    Disconnect = wire:disconnect({network_interface_card, NicPid}, WirePid),
+    ?assertEqual(ok, Disconnect).
 
-unsafe_plug_in_plug_in(_Config) ->
-    {ok, WirePid} = supervisor_wire:build(),
-    {ok, NicPid} = supervisor_nic:build(),
-    One = server_wire:unsafe_plug_in(WirePid, NicPid),
-    ?assertEqual(One, ok),
-    Two = server_wire:unsafe_plug_in(WirePid, NicPid),
-    ?assertEqual(Two, {error, refuse_wire_to_self}).
+connect_connect(_Config) ->
+    {ok, WirePid} = wire:build(),
+    {ok, NicPid} = network_interface_card:build(),
+    One = wire:connect({network_interface_card, NicPid}, WirePid),
+    ?assertEqual(ok, One),
+    Two = wire:connect({network_interface_card, NicPid}, WirePid),
+    ?assertEqual({error, unable_to_connect_wire}, Two).
 
 init_per_suite(Config) ->
     Config.
@@ -52,8 +52,8 @@ end_per_suite(_Config) ->
     ok.
 
 init_per_testcase(_TestCase, Config) ->
-    {ok, _} = supervisor_wire:start_link(),
-    {ok, _} = supervisor_nic:start_link(),
+    {ok, _} = wire_sup:start_link(),
+    {ok, _} = network_interface_card_sup:start_link(),
     Config.
 
 end_per_testcase(_TestCase, _Config) ->

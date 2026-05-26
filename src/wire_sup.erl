@@ -16,9 +16,9 @@ start_link() ->
 init([]) ->
     {ok,
         {{simple_one_for_one, 3, 30}, [
-            {server_wire,
+            {wire,
                 {
-                    server_wire, start_link, []
+                    wire, start_link, []
                 },
                 temporary, 2000, worker, []}
         ]}}.
