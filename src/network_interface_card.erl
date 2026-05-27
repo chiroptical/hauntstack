@@ -8,6 +8,8 @@
 %% public exports
 -export([
     build/0,
+    connect_to/2,
+    send/3,
     get_buffer/1
 ]).
 
@@ -28,6 +30,20 @@
     code_change/3,
     terminate/2
 ]).
+
+-spec connect_to(Endpoint :: pid(), Wire :: pid()) -> Reply :: term().
+-doc """
+Convenience to avoid writing `{network_interface_card, Nic}`
+""".
+connect_to(Endpoint, Wire) ->
+    wire:connect({?MODULE, Endpoint}, Wire).
+
+-spec send(Endpoint :: pid(), Wire :: pid(), Msg :: binary()) -> ok.
+-doc """
+Convenience function to avoid messing up `{network_interface_card, Nic}`
+""".
+send(Endpoint, Wire, Msg) ->
+    wire:send({?MODULE, Endpoint}, Wire, Msg).
 
 build() ->
     Mac = crypto:strong_rand_bytes(6),
