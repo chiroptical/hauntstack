@@ -24,25 +24,25 @@ all() ->
     ].
 
 disconnect(_Config) ->
-    {ok, WirePid} = wire:build(),
-    {ok, NicPid} = network_interface_card:build(),
-    Result = wire:disconnect({network_interface_card, NicPid}, WirePid),
+    {ok, WirePid} = wire:create(),
+    {ok, NicPid} = network_interface_card:create(),
+    Result = network_interface_card:disconnect(NicPid, WirePid),
     ?assertEqual({error, wire_not_connected}, Result).
 
 connect_disconnect(_Config) ->
-    {ok, WirePid} = wire:build(),
-    {ok, NicPid} = network_interface_card:build(),
-    Connect = wire:connect({network_interface_card, NicPid}, WirePid),
+    {ok, WirePid} = wire:create(),
+    {ok, NicPid} = network_interface_card:create(),
+    Connect = network_interface_card:connect(NicPid, WirePid),
     ?assertEqual(ok, Connect),
-    Disconnect = wire:disconnect({network_interface_card, NicPid}, WirePid),
+    Disconnect = network_interface_card:disconnect(NicPid, WirePid),
     ?assertEqual(ok, Disconnect).
 
 connect_connect(_Config) ->
-    {ok, WirePid} = wire:build(),
-    {ok, NicPid} = network_interface_card:build(),
-    One = wire:connect({network_interface_card, NicPid}, WirePid),
+    {ok, WirePid} = wire:create(),
+    {ok, NicPid} = network_interface_card:create(),
+    One = network_interface_card:connect(NicPid, WirePid),
     ?assertEqual(ok, One),
-    Two = wire:connect({network_interface_card, NicPid}, WirePid),
+    Two = network_interface_card:connect(NicPid, WirePid),
     ?assertEqual({error, unable_to_connect_wire}, Two).
 
 init_per_suite(Config) ->

@@ -33,10 +33,10 @@ init([]) ->
             id => wire_supervisor,
             start => {wire_sup, start_link, []}
         },
-        %% supervisor_nic:build() allows you to generate a NIC
+        %% network_interface_card:create() allows you to generate a NIC
         #{
-            id => server_nic_supervisor,
-            start => {supervisor_nic, start_link, []}
+            id => network_interface_card_supervisor,
+            start => {network_interface_card_sup, start_link, []}
         }
     ],
     {ok, {SupFlags, ChildSpecs}}.

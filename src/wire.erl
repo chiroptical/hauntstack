@@ -5,12 +5,12 @@ interface cards NICs.
 
 The connection has a `left` and `right` side, each can be `down` or `up`. The
 sides have no semantic meaning they are used to determine the directionality of
-data tranmission. For example, a frame sent to the left side will be recieved on
+data tranmission. For example, a frame sent to the left side will be received on
 the right side.
 
 All networking messages should use `wire:send/3` to relay information. These are
 asynchronous messages and only do anything if both sides are plugged in and the
-netwrork endpoint `pid()` matches one of the sides.
+network endpoint `pid()` matches one of the sides.
 
 A wire can be connected to anything that implements the `network_endpoint`
 behavior.
@@ -24,7 +24,7 @@ Add `connect/3` to connect both sides of a wire at once.
 
 %% Public exports
 -export([
-    build/0,
+    create/0,
     connect/2,
     disconnect/2,
     send/3
@@ -41,7 +41,7 @@ Add `connect/3` to connect both sides of a wire at once.
     terminate/2
 ]).
 
-build() ->
+create() ->
     Id = crypto:strong_rand_bytes(6),
     supervisor:start_child(wire_sup, [Id]).
 
@@ -82,13 +82,13 @@ handle_cast({send, {Module, Endpoint}, Msg}, State = #state{left = Left, right =
                 {up, #link{network_endpoint = {Module, Endpoint}}},
                 {up, #link{network_endpoint = {OtherModule, OtherEndpoint}}}
             } ->
-                ok = OtherModule:recieve(OtherEndpoint, self(), Msg),
+                ok = OtherModule:on_receive(OtherEndpoint, self(), Msg),
                 {noreply, State};
             {
                 {up, #link{network_endpoint = {OtherModule, OtherEndpoint}}},
                 {up, #link{network_endpoint = {Module, Endpoint}}}
             } ->
-                ok = OtherModule:recieve(OtherEndpoint, self(), Msg),
+                ok = OtherModule:on_receive(OtherEndpoint, self(), Msg),
                 {noreply, State};
             {_, _} ->
                 {noreply, State}
@@ -102,7 +102,7 @@ handle_call({connect, {Module, Endpoint}}, _From, State = #state{left = Left, ri
     case {Left, Right} of
         {down, _} ->
             maybe
-                ok ?= Module:connect(Endpoint, self()),
+                ok ?= Module:on_connect(Endpoint, self()),
                 {reply, ok, State#state{left = {up, #link{network_endpoint = {Module, Endpoint}}}}}
             else
                 _Err ->
@@ -110,7 +110,7 @@ handle_call({connect, {Module, Endpoint}}, _From, State = #state{left = Left, ri
             end;
         {_, down} ->
             maybe
-                ok ?= Module:connect(Endpoint, self()),
+                ok ?= Module:on_connect(Endpoint, self()),
                 {reply, ok, State#state{right = {up, #link{network_endpoint = {Module, Endpoint}}}}}
             else
                 _Err ->
@@ -123,7 +123,7 @@ handle_call({disconnect, {Module, Endpoint}}, _From, State = #state{left = Left,
     case {Left, Right} of
         {{up, #link{network_endpoint = {Module, Endpoint}}}, _} ->
             maybe
-                ok ?= Module:disconnect(Endpoint, self()),
+                ok ?= Module:on_disconnect(Endpoint, self()),
                 {reply, ok, State#state{left = down}}
             else
                 _Err ->
@@ -131,7 +131,7 @@ handle_call({disconnect, {Module, Endpoint}}, _From, State = #state{left = Left,
             end;
         {_, {up, #link{network_endpoint = {Module, Endpoint}}}} ->
             maybe
-                ok ?= Module:disconnect(Endpoint, self()),
+                ok ?= Module:on_disconnect(Endpoint, self()),
                 {reply, ok, State#state{right = down}}
             else
                 _Err ->
