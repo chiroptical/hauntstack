@@ -21,7 +21,7 @@ these layers are supposed to be robust even in these conditions.
 
 - Topology DSL, define endpoints with names/options and wires which connect endpoints
 - MAC registry service, start with globally unique MAC addresses
-- Tap is an endpoint which simply records what it recieved
+- Tap is an endpoint which simply records what it received
 - Set up OTEL tracing for packets and metrics for components
 
 # Haunting ideas

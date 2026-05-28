@@ -20,11 +20,11 @@ all() ->
     ].
 
 basic(_Config) ->
-    {ok, WirePid} = wire:build(),
-    {ok, NicOnePid} = network_interface_card:build(),
-    {ok, NicTwoPid} = network_interface_card:build(),
-    ok = network_interface_card:connect_to(NicOnePid, WirePid),
-    ok = network_interface_card:connect_to(NicTwoPid, WirePid),
+    {ok, WirePid} = wire:create(),
+    {ok, NicOnePid} = network_interface_card:create(),
+    {ok, NicTwoPid} = network_interface_card:create(),
+    ok = network_interface_card:connect(NicOnePid, WirePid),
+    ok = network_interface_card:connect(NicTwoPid, WirePid),
     ok = network_interface_card:send(NicOnePid, WirePid, ~"hello world"),
     {ok, OneBuffer} = network_interface_card:get_buffer(NicOnePid),
     ?assertEqual([], OneBuffer),

@@ -7,9 +7,7 @@
 
 %% public exports
 -export([
-    build/0,
-    connect_to/2,
-    send/3,
+    create/0,
     get_buffer/1
 ]).
 
@@ -17,7 +15,10 @@
 -export([
     connect/2,
     disconnect/2,
-    recieve/3
+    send/3,
+    on_connect/2,
+    on_disconnect/2,
+    on_receive/3
 ]).
 
 %% gen_server exports
@@ -31,32 +32,27 @@
     terminate/2
 ]).
 
--spec connect_to(Endpoint :: pid(), Wire :: pid()) -> Reply :: term().
--doc """
-Convenience to avoid writing `{network_interface_card, Nic}`
-""".
-connect_to(Endpoint, Wire) ->
-    wire:connect({?MODULE, Endpoint}, Wire).
-
--spec send(Endpoint :: pid(), Wire :: pid(), Msg :: binary()) -> ok.
--doc """
-Convenience function to avoid messing up `{network_interface_card, Nic}`
-""".
-send(Endpoint, Wire, Msg) ->
-    wire:send({?MODULE, Endpoint}, Wire, Msg).
-
-build() ->
+create() ->
     Mac = crypto:strong_rand_bytes(6),
     supervisor:start_child(network_interface_card_sup, [Mac]).
 
 connect(Endpoint, Wire) ->
-    gen_server:call(Endpoint, {connect, Wire}).
+    wire:connect({?MODULE, Endpoint}, Wire).
 
 disconnect(Endpoint, Wire) ->
+    wire:disconnect({?MODULE, Endpoint}, Wire).
+
+send(Endpoint, Wire, Msg) ->
+    wire:send({?MODULE, Endpoint}, Wire, Msg).
+
+on_connect(Endpoint, Wire) ->
+    gen_server:call(Endpoint, {connect, Wire}).
+
+on_disconnect(Endpoint, Wire) ->
     gen_server:call(Endpoint, {disconnect, Wire}).
 
-recieve(Endpoint, Wire, Msg) ->
-    gen_server:cast(Endpoint, {recieve, Wire, Msg}).
+on_receive(Endpoint, Wire, Msg) ->
+    gen_server:cast(Endpoint, {on_receive, Wire, Msg}).
 
 get_buffer(Endpoint) ->
     gen_server:call(Endpoint, get_buffer).
@@ -78,7 +74,7 @@ start_link(Id) ->
 init([Mac]) ->
     {ok, #state{mac = Mac, link = down, buffer = []}}.
 
-handle_cast({recieve, Wire, Msg}, State = #state{link = {up, Wire}}) ->
+handle_cast({on_receive, Wire, Msg}, State = #state{link = {up, Wire}}) ->
     {noreply, State#state{buffer = [Msg | State#state.buffer]}};
 handle_cast(_Msg, State) ->
     {noreply, State}.
