@@ -16,7 +16,4 @@ doc:
 serve: doc
 	@serve doc/
 
-pinact:
-	@pinact run
-
-.PHONY: build test format doc serve pinact
+.PHONY: build test format doc serve

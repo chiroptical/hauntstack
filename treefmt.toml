@@ -68,9 +68,9 @@ priority = 0
 
 [formatter.erlang]
 # Command to execute
-command = "rebar3"
+command = "erlfmt"
 # Command-line arguments for the command
-options = [ "fmt", "-w", "--" ]
+options = [ "-w" ]
 # Glob pattern of files to include
 includes = [ "**.erl", "rebar.config", "src/hauntstack.app.src" ]
 # Glob patterns of files to exclude
