@@ -6,7 +6,7 @@
   };
 
   outputs =
-    { nixpkgs, ... }:
+    { self, nixpkgs, ... }:
     let
       supportedSystems = [
         "aarch64-darwin"
@@ -16,11 +16,30 @@
       ];
 
       forAllSystems =
-        function: nixpkgs.lib.genAttrs supportedSystems (system: function nixpkgs.legacyPackages.${system});
+        function:
+        nixpkgs.lib.genAttrs supportedSystems (
+          system:
+          let
+            pkgs = nixpkgs.legacyPackages.${system};
+            beamPackages = pkgs.beam28Packages;
+          in
+          function { inherit pkgs beamPackages; }
+        );
     in
     {
-      devShells = forAllSystems (pkgs: {
-        default = pkgs.callPackage ./shell.nix { };
-      });
+      devShells = forAllSystems (
+        { pkgs, beamPackages }:
+        {
+          default = pkgs.callPackage ./shell.nix { inherit beamPackages; };
+        }
+      );
+
+      checks = forAllSystems (
+        { pkgs, beamPackages }:
+        import ./checks.nix {
+          inherit pkgs beamPackages;
+          src = self;
+        }
+      );
     };
 }

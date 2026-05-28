@@ -1,6 +1,8 @@
 hauntstack
 =====
 
+![NixCI Badge](https://nix-ci.com/badge/gh:chiroptical:hauntstack)
+
 "A haunted network simulator"
 
 This is a learning project to implement Layer 2-4 of the [Open Systems

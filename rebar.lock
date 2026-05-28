@@ -1,4 +1,1 @@
-[{<<"keysmith">>,
-  {git,"https://github.com/eproxus/keysmith",
-       {ref,"2777a5e2333269079906f97af5f2d9dc25d6e769"}},
-  0}].
+[].
