@@ -8,6 +8,7 @@
 %% public exports
 -export([
     create/0,
+    get_mac/1,
     get_buffer/1
 ]).
 
@@ -54,20 +55,24 @@ on_disconnect(Endpoint, Wire) ->
 on_receive(Endpoint, Wire, Msg) ->
     gen_server:cast(Endpoint, {on_receive, Wire, Msg}).
 
+-doc """
+This is useful in tests when encoding ethernet frames
+""".
+get_mac(Endpoint) ->
+    gen_server:call(Endpoint, get_mac).
+
 get_buffer(Endpoint) ->
     gen_server:call(Endpoint, get_buffer).
 
--spec start_link(Id :: binary()) -> gen_server:start_ret().
-start_link(Id) ->
-    gen_server:start_link(?MODULE, [Id], []).
-
--type link_status() :: down | {up, Wire :: pid()}.
+-spec start_link(Mac :: ethernet:mac()) -> gen_server:start_ret().
+start_link(Mac) ->
+    gen_server:start_link(?MODULE, [Mac], []).
 
 -type message_buffer() :: list(binary()).
 
 -record(state, {
-    mac :: binary(),
-    link :: link_status(),
+    mac :: ethernet:mac(),
+    link :: wire:link_status(),
     buffer :: message_buffer()
 }).
 
@@ -82,6 +87,8 @@ handle_cast(_Msg, State) ->
 handle_info(_Msg, State) ->
     {noreply, State}.
 
+handle_call(get_mac, _From, State = #state{mac = Mac}) ->
+    {reply, {ok, Mac}, State};
 handle_call(get_buffer, _From, State = #state{buffer = Buffer}) ->
     {reply, {ok, Buffer}, State};
 handle_call({disconnect, Wire}, _From, State = #state{link = Link}) ->

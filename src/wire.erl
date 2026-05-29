@@ -22,6 +22,11 @@ Add `connect/3` to connect both sides of a wire at once.
 
 -behavior(gen_server).
 
+%% Public types
+-export_type([
+    link_status/0
+]).
+
 %% Public exports
 -export([
     create/0,

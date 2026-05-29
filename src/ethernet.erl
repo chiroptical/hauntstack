@@ -8,6 +8,12 @@
     decode/1
 ]).
 
+-export_type([
+    mac/0
+]).
+
+-type mac() :: <<_:48>>.
+
 -type encode_error() :: mac_invalid_size | too_small_payload | too_large_payload.
 
 -spec encode(SrcNicMac :: binary(), DestNicMac :: binary(), Payload :: binary()) ->

@@ -10,6 +10,10 @@ let
     plugins = with beamPackages; [ erlfmt ];
   };
 
+  hexDeps = [
+    (import ./nix/s2.nix { inherit beamPackages; })
+  ];
+
   # Copy our source code into the temporary directory where our checks will
   # take place.
   copySource = ''
@@ -17,6 +21,13 @@ let
     chmod -R +w hauntstack
     cd hauntstack
     export HOME=$TMPDIR
+
+    # Set up Hex dependencies as _checkouts/
+    mkdir -p _checkouts
+    ${pkgs.lib.concatMapStringsSep "\n" (dep: ''
+      cp -r ${dep} _checkouts/${dep.pname}
+    '') hexDeps}
+    chmod -R +w _checkouts/
   '';
 in
 {

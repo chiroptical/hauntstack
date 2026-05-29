@@ -46,14 +46,14 @@ connect_connect(_Config) ->
     ?assertEqual({error, unable_to_connect_wire}, Two).
 
 init_per_suite(Config) ->
+    {ok, _} = application:ensure_all_started(hauntstack),
     Config.
 
 end_per_suite(_Config) ->
+    ok = application:stop(hauntstack),
     ok.
 
 init_per_testcase(_TestCase, Config) ->
-    {ok, _} = wire_sup:start_link(),
-    {ok, _} = network_interface_card_sup:start_link(),
     Config.
 
 end_per_testcase(_TestCase, _Config) ->
