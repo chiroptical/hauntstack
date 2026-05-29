@@ -57,17 +57,15 @@ on_receive(Endpoint, Wire, Msg) ->
 get_buffer(Endpoint) ->
     gen_server:call(Endpoint, get_buffer).
 
--spec start_link(Id :: binary()) -> gen_server:start_ret().
-start_link(Id) ->
-    gen_server:start_link(?MODULE, [Id], []).
-
--type link_status() :: down | {up, Wire :: pid()}.
+-spec start_link(Mac :: binary()) -> gen_server:start_ret().
+start_link(Mac) ->
+    gen_server:start_link(?MODULE, [Mac], []).
 
 -type message_buffer() :: list(binary()).
 
 -record(state, {
     mac :: binary(),
-    link :: link_status(),
+    link :: wire:link_status(),
     buffer :: message_buffer()
 }).
 
