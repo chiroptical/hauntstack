@@ -38,6 +38,21 @@ these layers are supposed to be robust even in these conditions.
     - MAC address change
     - MAC address overlap (via MAC registry)
 
+# Local Development
+
+## Re-run `nix flake check`
+
+```shell
+# Get current system value
+$ nix eval --impure --raw --expr 'builtins.currentSystem'
+# Get nix store paths we would need to delete to re-run the checks
+$ nix path-info .#checks.<system>.ct .#checks.<system>.eunit .#checks.<system>.treefmt
+# Delete the store paths from the store
+$ nix-store --delete <paths...>
+# Re-run the checks, printing the build output and with more verbosity
+$ nix flake check -L -v
+```
+
 # Potential inspiration
 
 - Simulate bad network connections with [comcast][comcast]
