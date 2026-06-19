@@ -37,6 +37,11 @@ init([]) ->
         #{
             id => network_interface_card_supervisor,
             start => {network_interface_card_sup, start_link, []}
+        },
+        %% multiport_switch:create() allows you to generate a switch
+        #{
+            id => multiport_switch_supervisor,
+            start => {multiport_switch_sup, start_link, []}
         }
     ],
     {ok, {SupFlags, ChildSpecs}}.
