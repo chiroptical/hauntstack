@@ -13,7 +13,7 @@ these layers are supposed to be robust even in these conditions.
 # Parts
 
 - [x] Two network interface cards (NICs) connected via a perfect wire
-- [ ] Multi-port switch with learning and flooding
+- [x] Multi-port switch with learning and flooding
 - [ ] IPv4
 - [ ] ARP
 - [ ] UDP
