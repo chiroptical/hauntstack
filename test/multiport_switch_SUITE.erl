@@ -21,6 +21,33 @@ all() ->
         learning
     ].
 
+-doc """
+In these tests we transmit frames through async messages. We need to wait
+for all messages to propogate through the network before we can evaluate the
+assertions.
+
+We require `Times` because the network may never reach a fix point.
+
+Technically, `supervisor:start_child/2` can return `{ok, undefined}`, but if
+that happens this will fail and that is fine.
+""".
+-spec wait_for(list(undefined | pid()), pos_integer()) ->
+    ok | {error, unable_to_reach_fixed_point}.
+wait_for(_Pids, 0) ->
+    {error, unable_to_reach_fixed_point};
+wait_for(Pids, Times) ->
+    {ok, Length} = go_wait_for(Pids, 0),
+    case Length of
+        0 -> ok;
+        _ -> wait_for(Pids, Times - 1)
+    end.
+
+go_wait_for([], Acc) ->
+    {ok, Acc};
+go_wait_for([Pid | Pids], Acc) ->
+    {message_queue_len, Length} = erlang:process_info(Pid, message_queue_len),
+    go_wait_for(Pids, Acc + Length).
+
 broadcast(_Config) ->
     % Resources
     {ok, WireOnePid} = wire:create(),
@@ -52,7 +79,13 @@ broadcast(_Config) ->
     {ok, DestMac} = network_interface_card:get_mac(NicTwoPid),
     {ok, Msg} = ethernet:encode(SrcMac, DestMac, crypto:strong_rand_bytes(46)),
     ok = network_interface_card:send(NicOnePid, WireOnePid, Msg),
-    timer:sleep(50),
+
+    ok = wait_for(
+        [
+            WireOnePid, WireTwoPid, WireThreePid, SwitchPid, NicOnePid, NicTwoPid, NicThreePid
+        ],
+        10
+    ),
 
     % Assertions
     {ok, OneBuffer} = network_interface_card:get_buffer(NicOnePid),
@@ -96,9 +129,21 @@ learning(_Config) ->
 
     % Source will be saved in the CAM table and then broadcast
     ok = network_interface_card:send(NicOnePid, WireOnePid, MsgOne),
+    ok = wait_for(
+        [
+            WireOnePid, WireTwoPid, WireThreePid, SwitchPid, NicOnePid, NicTwoPid, NicThreePid
+        ],
+        10
+    ),
+
     % Known destination, no broadcast!
     ok = network_interface_card:send(NicTwoPid, WireTwoPid, MsgTwo),
-    timer:sleep(50),
+    ok = wait_for(
+        [
+            WireOnePid, WireTwoPid, WireThreePid, SwitchPid, NicOnePid, NicTwoPid, NicThreePid
+        ],
+        10
+    ),
 
     % Assertions
     %% Frame sent from NicTwo directly
