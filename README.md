@@ -15,15 +15,23 @@ these layers are supposed to be robust even in these conditions.
 - [x] Two network interface cards (NICs) connected via a perfect wire
 - [x] Multi-port switch with learning and flooding
 - [ ] IPv4
+    - [x] Basic codec
+    - [ ] Support for special addresses (e.g. 127.0.0.0/8)
+    - [ ] Fragmentation of packets
+- [ ] ICMP
 - [ ] ARP
+- [ ] Add router network endpoint
 - [ ] UDP
 - [ ] TCP
 
 # Later
 
+- Larger MTUs (Maximum Transmission Unit)
+    - max is currently 1500 bytes in ethernet.erl
 - Topology DSL, define endpoints with names/options and wires which connect endpoints
 - MAC registry service, start with globally unique MAC addresses
-- Tap is an endpoint which simply records what it received
+- TAP is a network endpoint which records ethernet frames
+- TUN is a network endpoint which records IP packets
 - Set up OTEL tracing for packets and metrics for components
 
 # Haunting ideas
