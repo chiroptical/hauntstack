@@ -16,11 +16,25 @@ these layers are supposed to be robust even in these conditions.
 - [x] Multi-port switch with learning and flooding
 - [ ] IPv4
     - [x] Basic codec
-    - [ ] Support for special addresses (e.g. 127.0.0.0/8)
     - [ ] Fragmentation of packets
-- [ ] ICMP
 - [ ] ARP
+    - [ ] Codec
+    - [ ] Fix ethernet.erl to stop using `~"2048"` and use integers (similar to IPv4)
+    - [ ] ARP is embedded directly into an ethernet frame padded to 46 bytes
+        - decode needs to trim based on TotalLength
+- [ ] ICMP
+    - [ ] Codec
+        - Type - 8 bits
+        - Code - 8 bits
+        - Checksum - 16 bits, same checksum as IPv4 packet
+        - Rest of Header - 32 bits
+        - Messages - https://en.wikipedia.org/wiki/Internet_Control_Message_Protocol#Control_messages 
+            - Start with echo request/reply
+- [ ] Add host gen_server which owns a NIC
+    - [ ] Test an ARP request/reply between two hosts
+    - [ ] Test an ICMP echo request/reply between two hosts
 - [ ] Add router network endpoint
+    - [ ] ipv4:encode/decode extended to deal with TTL properly
 - [ ] UDP
 - [ ] TCP
 
@@ -33,6 +47,7 @@ these layers are supposed to be robust even in these conditions.
 - TAP is a network endpoint which records ethernet frames
 - TUN is a network endpoint which records IP packets
 - Set up OTEL tracing for packets and metrics for components
+- Support for special addresses (e.g. 127.0.0.0/8)
 
 # Haunting ideas
 

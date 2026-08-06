@@ -130,7 +130,7 @@ handle_cast(
                 {noreply, State#state{content_addressable_memory = NextCam}}
             else
                 {error, _} ->
-                    logging:error("Unable to parse ethernet frame"),
+                    logger:error("Unable to parse ethernet frame"),
                     {noreply, State}
             end;
         #{} ->
