@@ -19,7 +19,7 @@ these layers are supposed to be robust even in these conditions.
     - [ ] Fragmentation of packets
 - [ ] ARP
     - [ ] Codec
-    - [ ] Fix ethernet.erl to stop using `~"2048"` and use integers (similar to IPv4)
+    - [x] Fix ethernet.erl to stop using `~"2048"` and use two octets
     - [ ] ARP is embedded directly into an ethernet frame padded to 46 bytes
         - decode needs to trim based on TotalLength
 - [ ] ICMP

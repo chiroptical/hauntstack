@@ -2,6 +2,8 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-import_record(ethernet, [options]).
+
 -export([
     broadcast/1,
     learning/1
@@ -77,7 +79,9 @@ broadcast(_Config) ->
     % Transmission
     {ok, SrcMac} = network_interface_card:get_mac(NicOnePid),
     {ok, DestMac} = network_interface_card:get_mac(NicTwoPid),
-    {ok, Msg} = ethernet:encode(SrcMac, DestMac, crypto:strong_rand_bytes(46)),
+    {ok, Msg} = ethernet:encode(
+        SrcMac, DestMac, crypto:strong_rand_bytes(46), #ethernet:options{}
+    ),
     ok = network_interface_card:send(NicOnePid, WireOnePid, Msg),
 
     ok = wait_for(
@@ -124,8 +128,12 @@ learning(_Config) ->
     % Transmission
     {ok, SrcMac} = network_interface_card:get_mac(NicOnePid),
     {ok, DestMac} = network_interface_card:get_mac(NicTwoPid),
-    {ok, MsgOne} = ethernet:encode(SrcMac, DestMac, crypto:strong_rand_bytes(46)),
-    {ok, MsgTwo} = ethernet:encode(DestMac, SrcMac, crypto:strong_rand_bytes(46)),
+    {ok, MsgOne} = ethernet:encode(
+        SrcMac, DestMac, crypto:strong_rand_bytes(46), #ethernet:options{}
+    ),
+    {ok, MsgTwo} = ethernet:encode(
+        DestMac, SrcMac, crypto:strong_rand_bytes(46), #ethernet:options{}
+    ),
 
     % Source will be saved in the CAM table and then broadcast
     ok = network_interface_card:send(NicOnePid, WireOnePid, MsgOne),
@@ -167,6 +175,7 @@ end_per_suite(_Config) ->
     ok.
 
 init_per_testcase(_TestCase, Config) ->
+    {module, ethernet} = code:ensure_loaded(ethernet),
     Config.
 
 end_per_testcase(_TestCase, _Config) ->
