@@ -4,7 +4,7 @@
 """.
 
 -export([
-    encode/3,
+    encode/4,
     decode/1
 ]).
 
@@ -14,9 +14,15 @@
 
 -type mac() :: <<_:48>>.
 
+-record(#options{ether_type = ipv4 :: ether_type:ether_type()}).
+
+-export_record([options]).
+
 -type encode_error() :: mac_invalid_size | too_small_payload | too_large_payload.
 
--spec encode(SrcNicMac :: binary(), DestNicMac :: binary(), Payload :: binary()) ->
+-spec encode(
+    SrcNicMac :: binary(), DestNicMac :: binary(), Payload :: binary(), Options :: #options{}
+) ->
     {ok, binary()} | {error, encode_error()}.
 -doc """
 Excerpts from https://en.wikipedia.org/wiki/Ethernet_frame#Ethernet_II
@@ -43,20 +49,20 @@ the Payload is simpler if the CheckSum comes first.
 - IPv6 and ARP EtherType
 - IEEE 802.3 length i.e. < 0x0600
 """.
-encode(SrcNicMac, _, _) when byte_size(SrcNicMac) =/= 6 ->
+encode(SrcNicMac, _, _, _) when byte_size(SrcNicMac) =/= 6 ->
     {error, mac_invalid_size};
-encode(_, DestNicMac, _) when byte_size(DestNicMac) =/= 6 ->
+encode(_, DestNicMac, _, _) when byte_size(DestNicMac) =/= 6 ->
     {error, mac_invalid_size};
-encode(SrcNicMac, DestNicMac, Payload) ->
+encode(SrcNicMac, DestNicMac, Payload, Options) ->
     Size = byte_size(Payload),
     case Size of
         Size when Size < 46 -> {error, too_small_payload};
         Size when Size > 1500 -> {error, too_large_payload};
         _ ->
-            EtherType = ~"2048",
+            EtherType = ether_type:encode(Options#options.ether_type),
             CheckSum = erlang:crc32(Payload),
             {ok,
-                <<SrcNicMac:6/binary, DestNicMac:6/binary, EtherType:4/binary, CheckSum:32,
+                <<SrcNicMac:6/binary, DestNicMac:6/binary, EtherType:2/binary, CheckSum:32,
                     Payload:Size/binary>>}
     end.
 
@@ -69,7 +75,7 @@ encode(SrcNicMac, DestNicMac, Payload) ->
 
 """.
 decode(
-    <<SrcNicMac:6/binary, DestNicMac:6/binary, _EtherType:4/binary, CheckSum:32, Payload/binary>>
+    <<SrcNicMac:6/binary, DestNicMac:6/binary, _EtherType:2/binary, CheckSum:32, Payload/binary>>
 ) ->
     ComputedCheckSum = erlang:crc32(Payload),
     case CheckSum of

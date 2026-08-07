@@ -2,10 +2,14 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
+-import_record(ethernet, [options]).
+
 roundtrip_test() ->
     SrcNicMac = ~"000001",
     DestNicMac = ~"000002",
     Payload = ~"Lorem ipsum dolor sit amet consectetur adipiscing elit quisque faucibus",
-    {ok, Frame} = ethernet:encode(SrcNicMac, DestNicMac, Payload),
+    {ok, Frame} = ethernet:encode(
+        SrcNicMac, DestNicMac, Payload, #ethernet:options{}
+    ),
     Result = ethernet:decode(Frame),
     ?assertEqual(Result, {ok, {SrcNicMac, DestNicMac, Payload}}).
