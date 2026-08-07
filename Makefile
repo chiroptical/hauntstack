@@ -16,4 +16,10 @@ doc:
 serve: doc
 	@serve doc/
 
-.PHONY: build test format doc serve
+clean:
+	@rebar3 clean
+
+dialyzer:
+	@rebar3 dialyzer
+
+.PHONY: build test format doc serve clean dialyzer

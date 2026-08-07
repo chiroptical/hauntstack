@@ -21,7 +21,7 @@
           system:
           let
             pkgs = nixpkgs.legacyPackages.${system};
-            beamPackages = pkgs.beam28Packages;
+            beamPackages = pkgs.beam29Packages;
           in
           function { inherit pkgs beamPackages; }
         );
