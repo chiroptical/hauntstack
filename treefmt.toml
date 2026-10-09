@@ -74,7 +74,7 @@ options = [ "-w" ]
 # Glob pattern of files to include
 includes = [ "**.erl", "rebar.config", "src/hauntstack.app.src" ]
 # Glob patterns of files to exclude
-excludes = []
+excludes = [ "_checkouts/**.erl" ]
 # Controls the order of application when multiple formatters match the same file
 # Lower the number, the higher the precedence
 # Default is 0

@@ -21,7 +21,9 @@
           system:
           let
             pkgs = nixpkgs.legacyPackages.${system};
-            beamPackages = pkgs.beam29Packages;
+            beamPackages = pkgs.beam29Packages.extend (
+              final: super: { rebar3 = super.callPackage ./nix/rebar3.nix { }; }
+            );
           in
           function { inherit pkgs beamPackages; }
         );
