@@ -11,6 +11,10 @@
 
 -type encode_error() :: exceeds_maximum_length.
 
+-export_type([
+    address/0
+]).
+
 -type address() :: <<_:32>>.
 
 -spec encode(SrcAddress :: address(), DestAddress :: address(), Payload :: binary()) ->

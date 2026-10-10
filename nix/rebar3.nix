@@ -6,9 +6,13 @@
   fetchFromGitHub,
 }:
 
+let
+  version = "4.0.0-rc2";
+  reportedVsn = "4.0.0";
+in
 stdenv.mkDerivation {
   pname = "rebar3";
-  version = "4.0.0-rc2";
+  inherit version;
 
   src = fetchFromGitHub {
     owner = "stritzinger";
@@ -16,6 +20,11 @@ stdenv.mkDerivation {
     tag = "4.0.0-rc2";
     hash = "sha256-lJH/t+jr349KTpYcL6Dy4Z+MV908X7zqhNychzQO74Q=";
   };
+
+  postPatch = ''
+    substituteInPlace apps/rebar/src/rebar.app.src.script \
+      --replace-fail '{vsn, "git"}' '{vsn, "${reportedVsn}"}'
+  '';
 
   nativeBuildInputs = [
     erlang
