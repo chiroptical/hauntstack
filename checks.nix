@@ -4,14 +4,11 @@
   src,
 }:
 let
-  # Bundle plugins so rebar3 doesn't try to fetch them from the network.
-  # rebar3_ex_doc isn't in nixpkgs yet; eunit/ct will warn about it.
-  rebar3WithPlugins = beamPackages.rebar3WithPlugins {
-    plugins = with beamPackages; [ erlfmt ];
-  };
-
+  # Bundle deps and plugins as _checkouts so rebar3 doesn't try to fetch them
+  # from the network.
   hexDeps = [
     (import ./nix/s2.nix { inherit beamPackages; })
+    (import ./nix/rebar3_ex_doc.nix { inherit beamPackages; })
   ];
 
   # Copy our source code into the temporary directory where our checks will
@@ -22,7 +19,7 @@ let
     cd hauntstack
     export HOME=$TMPDIR
 
-    # Set up Hex dependencies as _checkouts/
+    # Set up Hex dependencies and plugins as _checkouts/
     mkdir -p _checkouts
     ${pkgs.lib.concatMapStringsSep "\n" (dep: ''
       cp -r ${dep} _checkouts/${dep.pname}
@@ -51,7 +48,7 @@ in
       {
         nativeBuildInputs = [
           beamPackages.erlang
-          rebar3WithPlugins
+          beamPackages.rebar3
         ];
       }
       ''
@@ -65,7 +62,7 @@ in
       {
         nativeBuildInputs = [
           beamPackages.erlang
-          rebar3WithPlugins
+          beamPackages.rebar3
         ];
       }
       ''
