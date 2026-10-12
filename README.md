@@ -19,9 +19,11 @@ these layers are supposed to be robust even in these conditions.
     - [ ] Fragmentation of packets
 - [ ] ARP
     - [ ] Codec
+        - https://en.wikipedia.org/wiki/Address_Resolution_Protocol#Packet_structure
     - [x] Fix ethernet.erl to stop using `~"2048"` and use two octets
     - [ ] ARP is embedded directly into an ethernet frame padded to 46 bytes
         - decode needs to trim based on TotalLength
+    - [ ] Test: three nodes (A -> B, A -> C), A broadcasts ARP, B responds ARP
 - [ ] ICMP
     - [ ] Codec
         - Type - 8 bits

@@ -1,8 +1,15 @@
-{"1.2.0",
-[{<<"s2">>,{pkg,<<"s2">>,<<"1.0.0">>},0}]}.
+{"2.0.0",
+[{deps,[{<<"s2">>,{pkg,<<"s2">>,<<"1.0.0">>},0}]},
+ {plugins,[{<<"rebar3_ex_doc">>,{pkg,<<"rebar3_ex_doc">>,<<"0.3.0">>},0}]}]}.
 [
 {pkg_hash,[
+{deps, [
  {<<"s2">>, <<"8338750B54AB6D26C82CA8100F9342FA81E3ACE1D2BD8361D560DD21F5573A1F">>}]},
+{plugins, [
+ {<<"rebar3_ex_doc">>, <<"2996E5AAF93417DC66223B005DFAC6A36CFF4ABCBE50A921D2C6F88CD3DF0658">>}]}]},
 {pkg_hash_ext,[
- {<<"s2">>, <<"027BACA05DC47C134C0B245F6CC62E0E2C4CE108A0DD64299E736DD604576320">>}]}
+{deps, [
+ {<<"s2">>, <<"027BACA05DC47C134C0B245F6CC62E0E2C4CE108A0DD64299E736DD604576320">>}]},
+{plugins, [
+ {<<"rebar3_ex_doc">>, <<"026100BE885317619FC420C468E26E468EA3162265081B69B397FCC73B18F87A">>}]}]}
 ].
